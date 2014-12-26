@@ -74,6 +74,7 @@ func CreateNetwork(id string, subnet *net.IPNet) (*Network, error) {
 		log.Debugf("Interface with name %s does not exist. Creating it.", id)
 		// Interface does not exist, use the generated subnet
 		gateway = ipam.Request(*subnet)
+		network = &Network{id, subnet.String(), gateway.String(), vlan}
 		AddInternalPort(ovs, defaultBridgeName, network.ID, vlan)
 		// TODO : Lame. Remove the sleep. This is required now to keep netlink happy
 		// in the next step to find the created interface.
@@ -96,9 +97,9 @@ func CreateNetwork(id string, subnet *net.IPNet) (*Network, error) {
 		if err != nil {
 			return nil, err
 		}
+		network = &Network{id, subnet.String(), gateway.String(), vlan}
 	}
 
-	network = &Network{id, subnet.String(), gateway.String(), vlan}
 	data, err := json.Marshal(network)
 	if err != nil {
 		return nil, err
